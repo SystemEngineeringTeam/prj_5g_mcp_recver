@@ -2,8 +2,7 @@ import os
 import socket
 
 PORT = int(os.environ.get("PORT") or 65500)
-SERVER = socket.gethostbyname(socket.gethostname())
-
+SERVER = os.environ.get("ADDRESS") or "127.0.0.1"
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -12,7 +11,8 @@ def main():
     try:
         while True:
             msg, address = s.recvfrom(8192)
-            print(f"[RECV] {address}: {msg.decode()}")
+            # print(f"[RECV] {address}: {msg}")
+            print(msg)
 
     except KeyboardInterrupt:
         print("Finished!")

@@ -1,23 +1,23 @@
-import os
+import time
 import socket
 from urllib.parse import urljoin
 from websocket import WebSocket, WebSocketApp
 from concurrent.futures import ThreadPoolExecutor
 
-PORT = int(os.environ.get("PORT") or 65500)
-ADDRESS = "127.0.0.1"
-RECV_IDS = os.environ.get("RECV_IDS").split(",")
+SEND_PORT = 12352
+ADDRESS = "192.168.101.72"
+RECV_IDS = [1, 2]
+WS_API_URL = "wss://prj-5g-with-mocopi.sysken.net/ws/"
 
-WS_API_URL = os.environ.get("WS_API_URL")
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-def on_message(ws, message: bytes | str):
+def on_message(ws, data: bytes | str):
     recv_id = ws.recv_id
-    str_message = message if type(message) == str else message.decode()
-    print(f"received[{recv_id}]: {str_message}")
+    now = time.strftime("%H:%M:%S")
+    print(f"received[{recv_id}]: {now}")
 
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.sendto(str_message.encode(), (ADDRESS, PORT))
+    s.sendto(data, (ADDRESS, SEND_PORT))
 
 
 def on_error(ws, error):
@@ -34,7 +34,7 @@ def on_open(ws: WebSocket):
 
 def run(id):
     ws = WebSocketApp(
-        urljoin(WS_API_URL, id),
+        urljoin(WS_API_URL, str(id)),
         on_open=on_open,
         on_message=on_message,
         on_error=on_error,

@@ -6,19 +6,27 @@ from websocket import WebSocket, WebSocketApp
 from concurrent.futures import ThreadPoolExecutor
 
 SEND_PORT = 12352
-RECV_IDS = [1, 2]
+RECV_IDS = [1]
 WS_API_URL = "wss://prj-5g-with-mocopi.sysken.net/ws/"
 ADDRESS = sys.argv[1] if len(sys.argv) > 1 else None
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
+last_timestamp = time.time()
 
 def on_message(ws, data: bytes | str):
     recv_id = ws.recv_id
-    now = time.strftime("%H:%M:%S")
-    print(f"received[{recv_id}]: {now}")
 
-    s.sendto(data, (ADDRESS, SEND_PORT))
+    splited_data = data.split("[:]".encode())
+    motion_data = splited_data[0] if len(splited_data) > 1 else data
+    timestamp = splited_data[1].decode() if len(splited_data) > 1 else time.time()
+
+    print(f"received[{recv_id}]: {timestamp}")
+    print(f"timestamp: {timestamp}")
+
+    if float(timestamp) < last_timestamp:
+        print(f"skip: {timestamp}")
+
+    s.sendto(motion_data, (ADDRESS, SEND_PORT))
 
 
 def on_error(ws, error):

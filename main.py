@@ -1,3 +1,4 @@
+import sys
 import time
 import socket
 from urllib.parse import urljoin
@@ -5,9 +6,9 @@ from websocket import WebSocket, WebSocketApp
 from concurrent.futures import ThreadPoolExecutor
 
 SEND_PORT = 12352
-ADDRESS = "192.168.101.72"
 RECV_IDS = [1, 2]
 WS_API_URL = "wss://prj-5g-with-mocopi.sysken.net/ws/"
+ADDRESS = sys.argv[1] if len(sys.argv) > 1 else None
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
